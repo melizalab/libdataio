@@ -1,0 +1,199 @@
+libpcmio.a
+
+1/11/96
+
+ pcmio.c
+ pcmio.h
+ pcmraw.c
+ pcmfix.c
+ pcmseq.c
+ pcmfeasd.c
+ 	created.  I've kept the pcmseq2_read.[ch] from my sigclass code, but
+	other than that, this is all new stuff.  What does it do?  Right now,
+	it presents the following interface functions:
+		pcm_open()
+		pcm_seek()
+		pcm_read()
+		pcm_close()
+	and allows one to read from raw pcm files, .pcm_fix, .pcm_seq2, or ESPS
+	.sd files, without ever worrying about what the file format is.  It
+	supports the notion of a single file containing multiple entries (for
+	.pcm_seq2 files), and can be told which entry to obtain via pcm_seek()).
+	Most nicely: it doesn't allocate memory for the data.  pcm_read() maps
+	an entire entry into memory from a file (in the case of feasd and pcmseq2
+	files, this is necessarily from a temporary file).  The data is returned
+	as a read-only memory block containing all of the samples; they are
+	actually only read in on reference...
+
+	TODO: add a pcm_write() function; add pcm_stat() to support obtaining
+	stuff like samplerate, etc.; add pcm_ctl() to allow various settings,
+	including the option of forcing the allocation of memory, etc.
+	Add MATLAB file support.  Add support for common sound file formats
+	(like .wav, .au, etc.)  Add Voxware support for audio card support
+	(under Linux).  Also, I plan to write toeio, which will support toe_lis
+	files; and lblio, which will support toe_lis files or label files.
+
+1/27/96
+
+ pcmio.c
+ pcmio.h
+ pcmraw.c
+ pcmfix.c
+ pcmseq.c
+ pcmfeasd.c
+ 	made lots of changes to everything.  Haven't tested any of them :->.  The
+	change include: 1) added pcm_stat(), pcm_ctl().  2) w/ pcm_stat(), can
+	now tell pcmio to use malloc() or mmap() for memory allocation.  3) With
+	pcm_stat() can obtain the number of samples in a given file/entry.
+	4) Various code cleanups.
+
+	Some of the cleanup involves the following: for pcmraw and pcmfix, I don't
+	read anything until actually asked... (before I was doing all the work in
+	pcm_open()).  Return values are a bit more consistent.  Check to see if
+	files were opened RDONLY before actually read()ing or stat()ing, etc.
+
+	TODO: the pcmfix code actually mmap()'s the file even if the data is the
+	wrong bytesex.  This is not the behavior I want.  I don't want the client
+	program to have to worry about bytesex at all.  The pcmseq code, for example,
+	does the necessary byte sex conversions automatically.  The solution is to
+	check if my bytesex is big-endian, and if so, convert.  If I'm using malloc,
+	I can convert after reading.  If I'm using mmap(), I'll have to do the whole
+	temporary file thing...
+
+	TODO: compile for VMS.  This will mean figuring out VMS equivalents for mmap(),
+	etc.
+
+	Implemented pcm_write().  I've implemented it for pcmseq, pcmraw, and pcmfix,
+	but not pcmfeasd files.  The pcmseq implementation was obviously the hardest,
+	but I wound up taking the code out of SABER.  The issue of the OS_SPECIFIC_SKIP
+	is unresolved (actually, I haven't tested any of the stuff I've written today).
+	Also, I made numerous changes to _ctl and _stat to better support writing.
+	The pcmfix implementation still has an unresolved bytesex conversion issue -
+	only because I'm tired right now.
+
+	I have now tested pcm_write().  It works.  Because it pads entries (almost
+	always), I have gone and modified the pcmseq2_read() code to read the real
+	(non-padded) size of a pcmseq2 entry.  I've also tested this.  So!!!  Now,
+	I can finally say that my handling of pcmseq2 files is pretty excellent.
+	Note: I have also tested the creation of multiple entries, etc.  I took a
+	pcm_seq2 from fred, read and wrote each entry into a new pcm_seq2 file
+	using the new pcmio code, and then used the old dumppcm to extract each
+	entry from the original file, and a new dumppcm that uses pcmio to extract
+	each entry from the new file.  The two sets of files(entries) were identical
+	(in size, and according to diff).  Thus, I feel pretty good about this code.
+
+	I still have to test the PCMIOMALLOC stuff, though.  Informally, I'd have to
+	say that the pcmio code crawls when it comes to reading and writing from
+	pcm_seq2 files with PCMIOMMAP.  Of course, it is doing lots of stuff (it is
+	pcmconverting, writing into a temp file with paging hardware, reading from
+	that file (with paging hardware), pcmconverting it, and then writing.  Using
+	malloc will avoid the temp file, and the paging.  Okay, now I've used the
+	MALLOC stuff.  It works, but I think the slowness problem is really with the
+	writing.  It seems to have to do with making hundreds of thousands of small
+	unbuffered I/O calls.  Maybe I should use buffered I/O for output!!!
+
+	Okay, now I'm doing buffered output (fopen instead of open, etc.)  WOW - what
+	a difference.  Here's some benchmarking numbers:
+
+	NOBUFFOUT + MMAP		13.710u 142.710s 2:54.28 89.7% 0+272k 32+631io 23pf+0w
+	NOBUFFOUT + MALLOC		12.830u 139.460s 2:44.61 92.5% 0+473k  1+ 67io  0pf+0w
+	BUFFOUT + MMAP			10.650u   2.710s 0:23.39 57.1% 0+275k 60+617io 46pf+0w
+	BUFFOUT + MALLOC		10.210u   1.490s 0:13.19 88.7% 0+467k 46+ 71io 46pf+0w
+
+	What is clear here is that using buffered output is an incredible win (a real
+	no-brainer), and that using malloc saves a significant (25-50%) amount of time
+	from the reading.  It does, however, increase the memory usage (from 275 to 475K).
+
+	The pcm_seq file I was using had no entries larger than 440k (it had 6 entries).
+	I think that defaulting to mmap usage for entries larger than about 2M is reasonable,
+	while using malloc for smaller ones will help speed things along for the majority of
+	cases.
+
+	I've added pcm_ctl() request flags PCMIOGETSIZE, PCMIOGETSR, PCMIOGETENTRY to use
+	as shortcuts to using pcm_stat().
+
+	TODO: a portable way to get at the date_time field within pcm_seq2 entries...
+
+	NOTE: okay, so in order to write pcm_seq2 files: do the following:
+
+		PCMFILE *fp;
+		short *data;
+
+		fp = pcm_open("aa.pcm_seq2", "w");
+		pcm_seek(fp, 1);					/* Not strictly necessary, but... */
+		pcm_write(fp, data, 200);
+		pcm_write(fp, data, 1000);
+		pcm_write(fp, data, 23);
+		pcm_seek(fp, 2);
+		pcm_write(fp, data, 50000);
+		pcm_write(fp, data, 100);
+		pcm_close(fp);
+
+	This creates a 2 entry pcm_seq2 file.
+
+	To read such a file:
+
+		PCMFILE *fp;
+		int nsamples;
+		short *data;
+
+		fp = pcm_open("aa.pcm_seq2", "r");
+		pcm_seek(fp, 1);					/* Not strictly necessary, but... */
+		pcm_ctl(fp, PCMIOGETSIZE, &nsamples);
+		if (nsamples > 1000000)
+			pcm_ctl(fp, PCMIOMMAP, NULL);
+		else
+			pcm_ctl(fp, PCMIOMALLOC, NULL);
+		pcm_read(fp, &data, &nsamples);
+
+		/* Do stuff with the data here */
+
+		pcm_close(fp);
+
+	IMPORTANT NOTE: you can't close the file until you have finished using the data.  If you
+	want to access the data after closing the file, you must first copy it and use the copy
+	instead!!!!!
+
+	Also, all of these commands (except pcm_close) return an int with a value of 0 on success
+	or -1 on failure.  Checking the return value is a good idea!!   Especially checking the
+	value of pcm_seek() is important, because the particular file format may not support seeks.
+
+
+2/5/96
+
+ pcmseq2_read.c
+ pcmseq2_read.h
+ pcmseq2.c
+ 	basically rewrote the pcmseq2 reading code.  NOW: the code is cleaner,
+	it now reads pcm_seq2 files from NFS partitions (ie: with the RMS
+	record size fields interspersed throughout the file), is considerably
+	more robust, possibly more efficient (fewer reads, more seeks), and
+	now returns the samplerate (and can be made to return pretty much any
+	of the header fields in the file - although datetime might require some
+	work to convert to native format on Unix machines.
+
+ pcmfix.c
+ 	Added code to allow it to sexconvert as needed.  Haven't tested it yet,
+	of course.  Also, some code cleanups and possible bug fixes to pcmfix.c
+	and pcmraw.c related to cleaning up between multiple reads.
+
+	TODO:
+		1. write toeio library
+		2. add toe_lis support to the lblio library
+		3. add lbl_write() support to lblio library - for label editing...
+		4. return the actual samplerate for pcm_seq2 and pcmfeasd files.
+		5. add MATLAB file support
+		6. add support for common sound file formats (eg: .wav, .au, etc.)
+		7. a portable way to deal with the date_time field of pcm_seq2 entries
+		8. add Voxware support for audio card A/D converters (under Linux)
+		9. compile on VMS.  means finding a VMS mmap-alike.
+		10. add .exp_idx file support
+		11. support writing feasd files
+
+2/21/96
+
+ pcmfix.c
+ 	fixed a bug which caused reading to crash on Sparc (big-endian) machines.  # of bytes != # of samples
+	to byte-sex convert...
+
+

@@ -1,0 +1,104 @@
+
+
+
+                DATAIO - a generic data acquisition file format interface
+                    library.
+                  copyright (2001) Amish S. Dave, M4, Ph.D.
+
+
+                           Contents:
+                            1. What is it?
+                            2. Author
+                            3. Copyright and disclaimer
+                            4. Requirements
+                            5. Install
+                            6. First-Time Usage
+                            7. FAQ
+                            8. Theory of operation
+
+
+    1.  What is it?
+    ---------------
+
+       Dataio is a library that presents a common interface for reading
+       and writing various types of data commonly encountered in a
+       neuronal/acoustic data acquisition setting.  Three types of data
+       are specifically handled:
+
+        PCM - pulse coded modulation,
+            i.e. raw waveforms from an analog-digital converter
+        LBL - events, such as the times at which stimuli are presented,
+            or a manually or automatically generated parsing of the
+            temporal sequence of animal/etc behaviors.  For vocalizations,
+            this can record the identity and onset/offset of specific
+            syllables, etc.
+        TOE - time-of-event
+            For storing the times of occurence of neuronal action potentials 
+
+       This library is specifically used by several of my programs:
+        saber - data acquisition
+        aplot - offline data visualization/analysis/figure generation
+        pcmx - pcm data conversion, processing, manipulation, playing, etc.
+        pcmstat - simple statistics 
+        toex - time of event data conversion, processing, etc.
+        toestat - simple statistics
+        aquery - flat-file database query
+        ...others...
+
+    2.  Author
+    ----------
+        Questions, remarks, suggestions, advice, contributions (:->)
+        are welcome.
+
+        MAIL:
+            Amish S. Dave
+            3230 Overland Ave. #207
+            Los Angeles, CA 90034
+
+        EMAIL:
+            amish@amishdave.net
+
+
+    3. Copyright and Disclaimer
+    ---------------------------
+        Copyright (c) 2001 by Amish S. Dave
+
+        This code is distributed under the GNU GENERAL PUBLIC LICENSE (GPL)
+        Version 2 (June 1991). See the "COPYING" file distributed with this
+        software for more info.
+
+        
+    4.  REQUIREMENTS
+    ----------------
+        ...
+
+
+    5.  INSTALL
+    -----------
+        The following should work (:->):
+            $ make clean
+            $ make depend
+            $ make
+        This should build libdataio.a as well as some test programs.
+        I don't get a single gcc warning, so I'm very interested in
+        hearing about problems.
+        Editing the Makefile might be necessary.
+
+        You should 'make install' the library as root before using it.
+
+
+    6.  FIRST-TIME USAGE
+    --------------------
+        ...
+
+
+    7.  FAQ
+    -------
+        1) ...
+        <under construction>
+
+
+    8.  THEORY OF OPERATION
+    -----------------------
+        <under construction>
+

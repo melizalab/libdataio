@@ -1,0 +1,64 @@
+5/10/2003
+    - Modified pcmseq2_write.c to compute currenttime using gettimeofday()
+        instead of time(). The result of this is that the saved time has
+        a resolution of microseconds rather than seconds.
+    - Added PCMIO_GETTIMEFRACTION and PCMIO_SETTIMEFRACTION.  These will
+        get and set the time in microseconds (on top of the time in seconds
+        read/written by PCMIO_GETTIME and PCMIO_SETTIME.  Together, SETTIME
+        and SETTIMEFRACTION, allow one to set the time of a pcmseq2 entry
+        to microsecond precision.  Other file formats (wav, raw, pcmfix)
+        do not support this level of precision.
+
+6/25/2003
+    - Removed the esps feasd support from pcmio (moved pcmfeasd.c into the
+        subdirectory obsolete).
+    - Moved libdataio out of saber and aplot, and put it into it's own
+        package.
+    - Changed the license to GPL
+
+1/4/04
+    - Major addition: added a video datatype.  Thus, there's a new header
+        file, vidio.h, and new functions, vid_open, vid_close, etc.
+        The only supported video data file right now is .avi files. These
+        must be the .avi files that are written by saber, which contain
+        some extra information (per-frame time stamps) in JUNK headers
+        that are ignored by normal avi file players.  This code is going
+        to be used by aplot, etc, to play video files recorded by saber.
+        Later, I'll also add avi file writing support.
+    - Note that the video code requires linking with libjpeg. (saber writes
+        jpeg compressed frames)
+    - There's a very rudimentary testvidio test program.
+
+5/8/04
+    - Fixed creation of .wav files for big-endian machines.  The data was
+        not being sex-converted (though the header was being written
+        correctly).
+    - Fixed up the detection of big-endian architectures.  I now include
+        endian.h, which is provided by glibc, and check for
+        __BYTE_ORDER == __BIG_ENDIAN.  Before, I was just doing ifdef for
+        sun or SGI
+    - Big-endian machines should now be able to read .exp_idx files.
+    - Big-endian machines should now be able to correctly write .pcm_fix.
+    - Big-endian machines should now be able to correctly read/write
+        .pcm_seq2 files.
+    - Now, all .pcm files are treated as containing little-endian samples.
+        Thus, big-endian machines should be able to read/write .pcm files
+        that were created or that can be read by little-endian machines.
+        By forcing this convention, it also means that the millions of
+        existing .pcm files can be read by big and little endian machines
+        without worry.
+
+5/9/04
+    - Writing out wav files only worked when pcm_write() was called once,
+        with the entire entry's worth of samples. I've now fixed it so
+        one can stream data into .wav files.
+
+12/13/05
+    - Added support for reading .mp3 files, with decoding provided
+        by MAD (MPEG Audio Decoder - available from
+        <http://www.underbit.com/products/mad/>), which must be installed.
+        If this support is wanted, then uncomment the MP3_* stuff in the
+        Makefile, and make sure to link any applications with libmad
+        (i.e., -lmad).  Feature requested by Eric Fortune.  Note that
+        channels (left, right, etc. are accessed as entries 1, 2, etc.)
+
