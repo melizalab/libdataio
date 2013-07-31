@@ -56,7 +56,7 @@ lib = env.Library('dataio', [x for x in env.Glob('*.c') if not str(x).startswith
 test_env = env.Clone()
 test_env.Append(LIBS=['jpeg','hdf5','hdf5_hl'])
 test = [test_env.Program(os.path.splitext(str(x))[0], [x, lib]) \
-            for x in env.Glob('test/*.c')]
+            for x in env.Glob('test*.c')]
 
 env.Alias('lib',lib)
 env.Alias('test',test)
