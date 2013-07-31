@@ -153,7 +153,7 @@ entry_timestamp(hid_t id, const char * name, int *timestamp)
 	char * slash = strrchr(name,'/');
 	char * entry = (char*)calloc(slash-name+1,sizeof(char));
 	strncpy(entry,name,slash-name);
-	printf("entry name: %s\n", entry);
+	/* printf("entry name: %s\n", entry); */
 	hid_t file_id = H5Iget_file_id(id);
 	hid_t entry_id = H5Gopen(file_id, entry, H5P_DEFAULT);
 	hid_t attr_id = H5Aopen_name(entry_id, DSET_TIMESTAMP);
@@ -187,7 +187,7 @@ hdf5_cb_read_dataset(hid_t id, const char * name, const H5L_info_t *link_info, v
 		entry_iter_info * info = (entry_iter_info*) data;
 		if (info->current_entry>=info->target_entry) {
 			read_entry(dset_id, info);
-			fprintf(stdout, "Read from dataset %s: %d samples @ %3.2f Hz)\n",
+			fprintf(stdout, "Read from dataset %s: %d samples @ %3.2f Hz\n",
 				name, info->len, info->sample_rate);
 			entry_timestamp(id, name, info->timestamp);
 			ret = 1;

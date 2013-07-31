@@ -60,6 +60,7 @@ int arfhdf5_open(PCMFILE *fp)
 	fp->seek = arfhdf5_seek;
 	fp->ctl = arfhdf5_ctl;
 	fp->stat = arfhdf5_stat;
+        fp->memalloctype = PCMIOMALLOC;
         // start counting entries
         hdf5_scan_entries(fp->fd, &(fp->nentries));
         // seek to the first entry
