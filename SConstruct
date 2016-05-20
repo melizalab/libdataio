@@ -55,6 +55,7 @@ else:
 headers = 'lblio.h pcmio.h toeio.h vidio.h'.split(' ')
 
 lib = env.Library('dataio', [x for x in env.Glob('*.c') if not str(x).startswith('test')])
+# slib = env.SharedLibrary('dataio', [x for x in env.Glob('*.c') if not str(x).startswith('test')])
 
 test_env = env.Clone()
 test = [test_env.Program(os.path.splitext(str(x))[0], [x, lib]) \
@@ -63,5 +64,5 @@ test = [test_env.Program(os.path.splitext(str(x))[0], [x, lib]) \
 env.Alias('lib',lib)
 env.Alias('test',test)
 
-env.Alias('install', env.Install(os.path.join(env['PREFIX'],'lib'), lib))
+env.Alias('install', env.Install(os.path.join(env['PREFIX'],'lib'), [lib]))
 env.Alias('install', env.Install(os.path.join(env['PREFIX'],'include'), headers))

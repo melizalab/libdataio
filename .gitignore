@@ -7,3 +7,4 @@
 /testarf
 *.a
 /.sconsign.dblite
+*.os
