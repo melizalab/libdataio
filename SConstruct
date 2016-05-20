@@ -33,6 +33,7 @@ Options:
 
 env = Environment(ENV = os.environ,
                   CCFLAGS=['-Wall'],
+                  LIBS=['m'],
                   PREFIX=install_prefix,
                   tools=['default'])
 
@@ -42,19 +43,20 @@ if os.environ.has_key('CC'):
 if system=='Darwin':
     env.Append(CPPPATH=['/opt/local/include'],
                LIBPATH=['/opt/local/lib'])
+else:
+    env.ParseConfig("pkg-config hdf5 --cflags --libs")
+    env.ParseConfig("pkg-config libjpeg --cflags --libs")
 
 if int(debug):
     env.Append(CCFLAGS=['-g2'])
 else:
     env.Append(CCFLAGS=['-O2'])
 
-
 headers = 'lblio.h pcmio.h toeio.h vidio.h'.split(' ')
 
 lib = env.Library('dataio', [x for x in env.Glob('*.c') if not str(x).startswith('test')])
 
 test_env = env.Clone()
-test_env.Append(LIBS=['jpeg','hdf5','hdf5_hl'])
 test = [test_env.Program(os.path.splitext(str(x))[0], [x, lib]) \
             for x in env.Glob('test*.c')]
 
@@ -63,4 +65,3 @@ env.Alias('test',test)
 
 env.Alias('install', env.Install(os.path.join(env['PREFIX'],'lib'), lib))
 env.Alias('install', env.Install(os.path.join(env['PREFIX'],'include'), headers))
-

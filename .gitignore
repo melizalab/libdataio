@@ -1,0 +1,9 @@
+*.o
+*.arf
+/testlblio
+/testpcmio
+/testtoeio
+/testvidio
+/testarf
+*.a
+/.sconsign.dblite

@@ -71,7 +71,7 @@ int arfhdf5_open(PCMFILE *fp)
 
 void arfhdf5_close(PCMFILE *fp)
 {
-	H5Fclose(fp->fd);
+	//H5Fclose(fp->fd);
 }
 
 int arfhdf5_read(PCMFILE *fp, short **buf_p, int *nsamples_p)
@@ -84,12 +84,8 @@ int arfhdf5_read(PCMFILE *fp, short **buf_p, int *nsamples_p)
 		/*
 		** Clean up from previous calls
 		*/
-		if (fp->addr != NULL)
-		{
-			if (fp->memalloctype == PCMIOMMAP)
-				munmap(fp->addr, fp->len);
-			else if (fp->memalloctype == PCMIOMALLOC)
-				free(fp->addr);
+		if (fp->addr != NULL) {
+                        free(fp->addr);
 		}
 		fp->addr = NULL;
 		fp->bufptr = NULL;
@@ -109,21 +105,17 @@ int arfhdf5_read(PCMFILE *fp, short **buf_p, int *nsamples_p)
 		** Either mmap() the file directly, or malloc() some memory and read the file into it.
 		** NOTE: For mmap(), we don't close() the file descriptor. For malloc(), we DO close() it.
 		*/
-		if (fp->memalloctype == PCMIOMALLOC)
-		{
-			if (hdf5_read_entry(fd, fp->entry-1, &len, &sample_rate, &timestamp, &microtimestamp,
-					    &addr) == -1)
-			{
-				free(addr);
-				H5Fclose(fd);
-				pcm_errno = errno;
-				return -1;
-			}
-			H5Fclose(fd);
-			fd = -1;
-			sexconv16_array(((short *)addr), len);
-		}
-		else return -1;
+                if (hdf5_read_entry(fd, fp->entry-1, &len, &sample_rate, &timestamp, &microtimestamp,
+                                    &addr) == -1)
+                {
+                        free(addr);
+                        H5Fclose(fd);
+                        pcm_errno = errno;
+                        return -1;
+                }
+                H5Fclose(fd);
+                fd = -1;
+                sexconv16_array(((short *)addr), len);
 
 		/*
 		** Now it is read
