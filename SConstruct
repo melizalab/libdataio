@@ -46,6 +46,7 @@ if system=='Darwin':
 else:
     env.ParseConfig("pkg-config hdf5 --cflags --libs")
     env.ParseConfig("pkg-config libjpeg --cflags --libs")
+    env.Append(CCFLAGS=['-fPIC'])
 
 if int(debug):
     env.Append(CCFLAGS=['-g2'])
