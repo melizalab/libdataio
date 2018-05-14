@@ -33,65 +33,65 @@ extern int pcm_errno;
 #define PCMIODECENTRY 4
 #define PCMIOSETTIME 5
 #define PCMIOSETSR 6
-#define PCMIOGETSIZE 7				/* Get the size in samples - shortcut to using pcm_stat() - arg = int* */
-#define PCMIOGETSR 8				/* Get the samplerate in Hz - shortcut to using pcm_stat() - arg = int* */
-#define PCMIOGETENTRY 9				/* Get the entry - shortcut to using pcm_stat() - arg = int* */
-#define PCMIOGETTIME 10				/* Get the timestamp - shortcut to using pcm_stat() - arg = (long *) */
-#define PCMIOGETCAPS 11				/* Get the capabilities of this file format... Includes MULTENTRY */
+#define PCMIOGETSIZE 7                          /* Get the size in samples - shortcut to using pcm_stat() - arg = int* */
+#define PCMIOGETSR 8                            /* Get the samplerate in Hz - shortcut to using pcm_stat() - arg = int* */
+#define PCMIOGETENTRY 9                         /* Get the entry - shortcut to using pcm_stat() - arg = int* */
+#define PCMIOGETTIME 10                         /* Get the timestamp - shortcut to using pcm_stat() - arg = (long *) */
+#define PCMIOGETCAPS 11                         /* Get the capabilities of this file format... Includes MULTENTRY */
 #define PCMIOSETTIMEFRACTION 12
-#define PCMIOGETTIMEFRACTION 13		/* Get the timestamp's microseconds fraction, arg = (long *) */
-#define PCMIOGETNENTRIES 14			/* Get the number of entries in this file */
+#define PCMIOGETTIMEFRACTION 13         /* Get the timestamp's microseconds fraction, arg = (long *) */
+#define PCMIOGETNENTRIES 14                     /* Get the number of entries in this file */
 
-#define PCMIOCAP_MULTENTRY 1		/* This file format can hold >1 entry... */
-#define PCMIOCAP_SAMPRATE 2			/* This file format stores samplerate info... */
+#define PCMIOCAP_MULTENTRY 1            /* This file format can hold >1 entry... */
+#define PCMIOCAP_SAMPRATE 2                     /* This file format stores samplerate info... */
 
 typedef struct pcmfilestruct
 {
-	char *name;
-	int flags;
-	int entry;
-	int fd;
-	void *addr;
-	int len;
-	short *bufptr;
-	int buflen;
-	int memalloctype;
-	int (*open)();
-	void (*close)();
-	int (*read)();
-	int (*write)();
-	int (*seek)();
-	int (*ctl)();
-	int (*stat)();
-	char *tempnam;
+        char *name;
+        int flags;
+        int entry;
+        int fd;
+        void *addr;
+        int len;
+        short *bufptr;
+        int buflen;
+        int memalloctype;
+        int (*open)();
+        void (*close)();
+        int (*read)();
+        int (*write)();
+        int (*seek)();
+        int (*ctl)();
+        int (*stat)();
+        char *tempnam;
 #ifdef USING_ESPS
-	void *header;				/* For ESPS */
-	FILE *espsfp;				/* For ESPS */
+        void *header;                           /* For ESPS */
+        FILE *espsfp;                           /* For ESPS */
 #endif
-	int samplerate;
-	int timestamp;
-	long microtimestamp;
-	int nentries;
-	void *p2file;				/* For PCMSEQ2 */
-	int pcmseq3_entrysize;		/* For PCMSEQ2 */
-	char pcmseq3_key[29];		/* For PCMSEQ2 */
-	long pcmseq3_cursamp;		/* For PCMSEQ2 */
-	long pcmseq3_poscache;		/* For PCMSEQ2 */
-	int entrystarted;			/* For PCMSEQ2 */
-	FILE *outfp;
-	int wav_nbytes_addr1;
-	int wav_nbytes_addr2;
+        int samplerate;
+        int timestamp;
+        long microtimestamp;
+        int nentries;
+        void *p2file;                           /* For PCMSEQ2 */
+        int pcmseq3_entrysize;          /* For PCMSEQ2 */
+        char pcmseq3_key[29];           /* For PCMSEQ2 */
+        long pcmseq3_cursamp;           /* For PCMSEQ2 */
+        long pcmseq3_poscache;          /* For PCMSEQ2 */
+        int entrystarted;                       /* For PCMSEQ2 */
+        FILE *outfp;
+        int wav_nbytes_addr1;
+        int wav_nbytes_addr2;
 } PCMFILE;
 
 struct pcmstat
 {
-	int	entry;
-	int	nsamples;
-	int	samplerate;
-	int timestamp;
-	long microtimestamp;
-	int capabilities;
-	int nentries;
+        int     entry;
+        int     nsamples;
+        int     samplerate;
+        int timestamp;
+        long microtimestamp;
+        int capabilities;
+        int nentries;
 };
 
 PCMFILE *pcm_open(char *, char *);
@@ -176,4 +176,3 @@ int arfhdf5_ctl(PCMFILE *fp, int request, void *arg);
 int arfhdf5_stat(PCMFILE *fp, struct pcmstat *buf);
 
 #endif
-

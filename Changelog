@@ -1,6 +1,7 @@
 
+2018.05.15:  (v1.0.1) bugfixes to compile on debian stretch against hdf5 1.10
+2016.05.20:  (v1.0.0) some fixes to compile on debian jessie
 2011.10.19:  Fix bugs related to timestamp and reading floating point data
 2011.07.11:  Now reads arf 1.1 format (and probably not earlier)
 2010.05.27:  Add support for reading arf (HDF5) files
 2008.09.02:  Added to darcs repository
-

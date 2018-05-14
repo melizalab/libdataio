@@ -46,8 +46,9 @@ int arfhdf5_recognizer(PCMFILE *fp)
 
 int arfhdf5_open(PCMFILE *fp)
 {
+        hid_t fd;
         // attempt to open
-        if ((fp->fd = H5Fopen(fp->name, H5F_ACC_RDONLY, H5P_DEFAULT)) == -1)
+        if ((fd = H5Fopen(fp->name, H5F_ACC_RDONLY, H5P_DEFAULT)) == -1)
         {
                 pcm_errno = errno;
                 return -1;
@@ -62,8 +63,9 @@ int arfhdf5_open(PCMFILE *fp)
         fp->stat = arfhdf5_stat;
         fp->addr = NULL;
         fp->memalloctype = PCMIOMALLOC;
-        // start counting entries
-        hdf5_scan_entries(fp->fd, &(fp->nentries));
+        // count entries
+        hdf5_scan_entries(fd, &(fp->nentries));
+        H5Fclose(fd);
         // seek to the first entry
         arfhdf5_seek(fp, 1);
 
@@ -77,8 +79,9 @@ void arfhdf5_close(PCMFILE *fp)
 
 int arfhdf5_read(PCMFILE *fp, short **buf_p, int *nsamples_p)
 {
-        int fd, len, sample_rate, timestamp, microtimestamp;
-        void *addr;
+        hid_t fd;
+        int len, sample_rate, timestamp, microtimestamp;
+        short *addr;
 
         if (fp->flags == O_RDONLY)
         {
@@ -109,7 +112,7 @@ int arfhdf5_read(PCMFILE *fp, short **buf_p, int *nsamples_p)
                 }
                 H5Fclose(fd);
                 fd = -1;
-                sexconv16_array(((short *)addr), len);
+                sexconv16_array(addr, len);
 
                 /*
                 ** Now it is read
@@ -117,7 +120,7 @@ int arfhdf5_read(PCMFILE *fp, short **buf_p, int *nsamples_p)
                 fp->fd = fd;
                 fp->addr = addr;
                 fp->len = len * sizeof(short);
-                fp->bufptr = (short *)addr;
+                fp->bufptr = addr;
                 fp->buflen = fp->len;
                 fp->samplerate = sample_rate;
                 fp->timestamp = timestamp;
