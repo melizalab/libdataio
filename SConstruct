@@ -40,12 +40,13 @@ env = Environment(ENV = os.environ,
 if os.environ.has_key('CC'):
     env.Replace(CC=os.environ['CC'])
 
+env.ParseConfig("pkg-config libjpeg --cflags --libs")
 if system=='Darwin':
     env.Append(CPPPATH=['/opt/local/include'],
-               LIBPATH=['/opt/local/lib'])
+               LIBPATH=['/opt/local/lib'],
+               LIBS=['hdf5'])
 else:
     env.ParseConfig("pkg-config hdf5 --cflags --libs")
-    env.ParseConfig("pkg-config libjpeg --cflags --libs")
     env.Append(CCFLAGS=['-fPIC'])
 
 if int(debug):
