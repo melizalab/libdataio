@@ -37,7 +37,7 @@ env = Environment(ENV = os.environ,
                   PREFIX=install_prefix,
                   tools=['default'])
 
-if os.environ.has_key('CC'):
+if 'CC' in os.environ:
     env.Replace(CC=os.environ['CC'])
 
 env.ParseConfig("pkg-config libjpeg --cflags --libs")

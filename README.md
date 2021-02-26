@@ -39,7 +39,7 @@ info.
 
 dataio requires libjpeg, HDF5 version 8 or later, and uses scons for compilation. To install on debian,
 
-    apt-get install hdf5-dev scons
+    apt-get install libjpeg-dev libhdf5-dev scons
 
 ### Installation
 
